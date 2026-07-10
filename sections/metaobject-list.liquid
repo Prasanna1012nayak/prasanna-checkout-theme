@@ -1,0 +1,70 @@
+{%- assign metaobject_list_1 = page.metafields.custom.dummy_test.value -%}
+{%- assign metaobject_list_2 = page.metafields.custom.dummy_test_2.value -%}
+{%- assign metaobject_list_3 = page.metafields.custom.dummy_test_3.value -%}
+
+{% paginate metaobject_list_1 by 250 %}
+  <div id="metaobject-list-1" class="metaobject-list">
+    {% for entry in metaobject_list_1 %}
+      <div>{{ entry.heading }}</div>
+    {% endfor %}
+  </div>
+  {% if paginate.next %}
+    <button class="load-more" data-target="metaobject-list-1" data-next="{{ paginate.next.url }}" style="display:none;">
+      Read More
+    </button>
+  {% endif %}
+{% endpaginate %}
+
+{% paginate metaobject_list_2 by 250 %}
+  <div id="metaobject-list-2" class="metaobject-list">
+    {% for entry in metaobject_list_2 %}
+      <div>{{ entry.heading }}</div>
+    {% endfor %}
+  </div>
+  {% if paginate.next %}
+    <button class="load-more" data-target="metaobject-list-2" data-next="{{ paginate.next.url }}" style="display:none;">
+      Read More
+    </button>
+  {% endif %}
+{% endpaginate %}
+
+{% paginate metaobject_list_3 by 250 %}
+  <div id="metaobject-list-3" class="metaobject-list">
+    {% for entry in metaobject_list_3 %}
+      <div>{{ entry.heading }}</div>
+    {% endfor %}
+  </div>
+  {% if paginate.next %}
+    <button class="load-more" data-target="metaobject-list-3" data-next="{{ paginate.next.url }}" style="display:none;">
+      Read More
+    </button>
+  {% endif %}
+{% endpaginate %}
+
+<script>
+  document.addEventListener("DOMContentLoaded", async function () {
+    const buttons = document.querySelectorAll(".load-more");
+
+    for (const button of buttons) {
+      const targetId = button.dataset.target;
+      const container = document.getElementById(targetId);
+      let nextUrl = button.dataset.next;
+
+      while (nextUrl) {
+        const response = await fetch(nextUrl);
+        const html = await response.text();
+        const doc = new DOMParser().parseFromString(html, "text/html");
+
+        const newContainer = doc.querySelector("#" + targetId);
+        if (newContainer) {
+          container.insertAdjacentHTML("beforeend", newContainer.innerHTML);
+        }
+
+        const nextButton = doc.querySelector('.load-more[data-target="' + targetId + '"]');
+        nextUrl = nextButton ? nextButton.dataset.next : null;
+      }
+
+      button.remove();
+    }
+  });
+</script>
