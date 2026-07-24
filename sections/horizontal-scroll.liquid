@@ -1,0 +1,248 @@
+{{ 'section-horizontal-scroll.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+<div class="horizontal-scroll section-{{ section.id }}-padding" data-hz-section>
+  <div class="horizontal-scroll__pin" data-hz-pin>
+    <div class="horizontal-scroll__track" data-hz-track>
+      {%- for block in section.blocks -%}
+        <div class="horizontal-scroll__slide" {{ block.shopify_attributes }}>
+          <div class="horizontal-scroll__slide-inner">
+            {%- if block.settings.video != blank -%}
+              <div class="horizontal-scroll__slide-video">
+                <video
+                  playsinline
+                  loop
+                  muted
+                  autoplay
+                  preload="auto"
+                  class="horizontal-scroll__video-el"
+                >
+                  {%- for source in block.settings.video.sources -%}
+                    <source src="{{ source.url }}" type="{{ source.mime_type }}">
+                  {%- endfor -%}
+                </video>
+              </div>
+            {%- elsif block.settings.video_url != blank -%}
+              <div class="horizontal-scroll__slide-video">
+                <video
+                  playsinline
+                  loop
+                  muted
+                  autoplay
+                  preload="auto"
+                  src="{{ block.settings.video_url }}"
+                  class="horizontal-scroll__video-el"
+                ></video>
+              </div>
+            {%- elsif block.settings.image != blank -%}
+              <div class="horizontal-scroll__slide-image">
+                {{
+                  block.settings.image
+                  | image_url: width: 1200
+                  | image_tag: loading: 'lazy', sizes: '(min-width: 990px) 70vw, (min-width: 750px) 80vw, 100vw', widths: '375, 600, 800, 1000, 1200'
+                }}
+              </div>
+            {%- endif -%}
+
+            {%- if block.settings.heading != blank -%}
+              <h2 class="horizontal-scroll__slide-heading">{{ block.settings.heading }}</h2>
+            {%- endif -%}
+
+            {%- if block.settings.text != blank -%}
+              <p class="horizontal-scroll__slide-text">{{ block.settings.text }}</p>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var section = document.querySelector('[data-hz-section]');
+  if (!section) return;
+
+  var GSAP_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.7/gsap.min.js';
+  var ST_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.7/ScrollTrigger.min.js';
+  var loaded = false;
+
+  function loadScript(src, cb) {
+    if (typeof gsap !== 'undefined' && src.includes('gsap.min')) { cb(); return; }
+    if (typeof ScrollTrigger !== 'undefined' && src.includes('ScrollTrigger')) { cb(); return; }
+    var s = document.createElement('script');
+    s.src = src;
+    s.onload = cb;
+    document.body.appendChild(s);
+  }
+
+  function initHorizontalScroll() {
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    var pin = section.querySelector('[data-hz-pin]');
+    var track = section.querySelector('[data-hz-track]');
+    var slides = track.querySelectorAll('.horizontal-scroll__slide');
+
+    if (slides.length < 2) return;
+
+    var totalWidth = 0;
+    slides.forEach(function(s) { totalWidth += s.offsetWidth; });
+    var scrollDistance = totalWidth - pin.offsetWidth;
+
+    /* Smooth horizontal scroll driven by vertical page scroll */
+    var scrollTarget = { value: 0 };
+
+    ScrollTrigger.create({
+      trigger: section,
+      start: 'top bottom',
+      end: 'bottom top',
+      invalidateOnRefresh: true,
+      onUpdate: function(self) {
+        var target = self.progress * scrollDistance;
+        gsap.to(scrollTarget, {
+          value: target,
+          duration: 0.6,
+          ease: 'power2.out',
+          overwrite: true,
+          onUpdate: function() {
+            pin.scrollLeft = scrollTarget.value;
+          }
+        });
+      }
+    });
+  }
+
+  /* Lazy load */
+  var observer = new IntersectionObserver(function(entries) {
+    if (entries[0].isIntersecting && !loaded) {
+      loaded = true;
+      observer.disconnect();
+
+      loadScript(GSAP_CDN, function() {
+        loadScript(ST_CDN, function() {
+          initHorizontalScroll();
+        });
+      });
+    }
+  }, { rootMargin: '400px' });
+
+  observer.observe(section);
+
+  /* Shopify editor */
+  if (typeof Shopify !== 'undefined' && Shopify.designMode) {
+    document.addEventListener('shopify:section:load', function(e) {
+      if (e.target.querySelector('[data-hz-section]')) {
+        setTimeout(initHorizontalScroll, 500);
+      }
+    });
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Horizontal Scroll",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "video",
+          "id": "video",
+          "label": "Video (priority)"
+        },
+        {
+          "type": "url",
+          "id": "video_url",
+          "label": "Video URL (fallback if no uploaded video)"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image (used if no video)"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Slide heading"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text",
+          "default": "Add your slide content here."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Horizontal Scroll",
+      "blocks": [
+        {
+          "type": "slide",
+          "settings": {
+            "heading": "First Slide",
+            "text": "Content for the first slide."
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "heading": "Second Slide",
+            "text": "Content for the second slide."
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "heading": "Third Slide",
+            "text": "Content for the third slide."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,288 @@
+/* 360° Model Viewer Section */
+.model-360 {
+  overflow: hidden;
+  background-color: #f5f5f0;
+  position: relative;
+}
+
+.model-360--dark {
+  background-color: #1a1714;
+}
+
+.model-360__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  padding: 0 20px;
+}
+
+@media screen and (min-width: 990px) {
+  .model-360__inner {
+    flex-direction: row;
+    gap: 60px;
+    padding: 0;
+  }
+}
+
+/* ── Text column ── */
+.model-360__text {
+  text-align: center;
+  max-width: 480px;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.model-360__text.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media screen and (min-width: 990px) {
+  .model-360__text {
+    text-align: left;
+    flex: 0 0 380px;
+  }
+}
+
+.model-360__heading {
+  font-family: var(--font-heading-family);
+  font-weight: var(--font-heading-weight);
+  font-size: 2.8rem;
+  line-height: 1.15;
+  text-transform: uppercase;
+  color: #2b2821;
+  margin: 0 0 16px;
+}
+
+.model-360--dark .model-360__heading {
+  color: #f5f5f0;
+}
+
+@media screen and (min-width: 750px) {
+  .model-360__heading {
+    font-size: 4rem;
+  }
+}
+
+.model-360__subheading {
+  font-family: var(--font-body-family);
+  font-size: 1.5rem;
+  line-height: 1.6;
+  color: #5a5347;
+  margin: 0 0 24px;
+}
+
+.model-360--dark .model-360__subheading {
+  color: #a89f94;
+}
+
+.model-360__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body-family);
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #2b2821;
+  background: rgba(43, 40, 33, 0.08);
+  padding: 8px 16px;
+  border-radius: 100px;
+  margin-bottom: 20px;
+}
+
+.model-360--dark .model-360__badge {
+  color: #f5f5f0;
+  background: rgba(245, 245, 240, 0.1);
+}
+
+.model-360__badge svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ── AR button ── */
+.model-360__ar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body-family);
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #fff;
+  background: #2b2821;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.model-360__ar-btn:hover {
+  background: #3d3830;
+  transform: translateY(-1px);
+}
+
+.model-360--dark .model-360__ar-btn {
+  background: #f5f5f0;
+  color: #1a1714;
+}
+
+.model-360--dark .model-360__ar-btn:hover {
+  background: #fff;
+}
+
+/* ── Viewer column ── */
+.model-360__viewer {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  aspect-ratio: 1;
+  flex-shrink: 0;
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.8s ease 0.2s, transform 0.8s ease 0.2s;
+}
+
+.model-360__viewer.is-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@media screen and (min-width: 990px) {
+  .model-360__viewer {
+    flex: 1;
+    max-width: 600px;
+  }
+}
+
+/* Glow ring */
+.model-360__glow {
+  position: absolute;
+  inset: 10%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(194, 165, 120, 0.25) 0%, transparent 70%);
+  filter: blur(40px);
+  pointer-events: none;
+  animation: m360-glow-pulse 4s ease-in-out infinite;
+  z-index: 0;
+}
+
+.model-360--dark .model-360__glow {
+  background: radial-gradient(circle, rgba(194, 165, 120, 0.35) 0%, transparent 70%);
+}
+
+@keyframes m360-glow-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+/* ── model-viewer element ── */
+.model-360__model-viewer {
+  width: 100%;
+  height: 100%;
+  border-radius: 24px;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  --poster-color: transparent;
+  background: transparent;
+}
+
+/* ── Loading progress ── */
+.model-360__progress-wrapper {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140px;
+  transition: opacity 0.4s ease;
+}
+
+.model-360__progress-wrapper.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.model-360__progress-track {
+  width: 100%;
+  height: 4px;
+  background: rgba(43, 40, 33, 0.15);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.model-360--dark .model-360__progress-track {
+  background: rgba(245, 245, 240, 0.15);
+}
+
+.model-360__progress-bar {
+  height: 100%;
+  width: 0%;
+  background: #2b2821;
+  border-radius: 4px;
+  transition: width 0.15s ease;
+}
+
+.model-360--dark .model-360__progress-bar {
+  background: #f5f5f0;
+}
+
+/* ── AR button inside model-viewer ── */
+.model-360__ar-inner-btn {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body-family);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2b2821;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(43, 40, 33, 0.15);
+  padding: 8px 16px;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.model-360__ar-inner-btn:hover {
+  background: #2b2821;
+  color: #fff;
+  border-color: #2b2821;
+}
+
+/* ── Placeholder (no model URL set) ── */
+.model-360__placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  border-radius: 24px;
+  border: 2px dashed rgba(43, 40, 33, 0.2);
+  color: #5a5347;
+  text-align: center;
+  padding: 40px;
+}
+
+.model-360--dark .model-360__placeholder {
+  border-color: rgba(245, 245, 240, 0.2);
+  color: #a89f94;
+}
+
+.model-360__placeholder p {
+  font-family: var(--font-body-family);
+  font-size: 1.4rem;
+  margin: 0;
+  max-width: 260px;
+  line-height: 1.5;
+}

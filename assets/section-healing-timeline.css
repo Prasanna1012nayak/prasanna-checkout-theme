@@ -1,0 +1,270 @@
+.healing-timeline {
+  background-color: #fff;
+  color: #2b2821;
+}
+
+.healing-timeline__container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  max-width: var(--page-width, 1200px);
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+@media screen and (min-width: 990px) {
+  .healing-timeline__container {
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+  }
+}
+
+/* Heading area */
+.healing-timeline__header {
+  margin-bottom: 20px;
+}
+
+.healing-timeline__heading {
+  font-family: var(--font-heading-family);
+  font-weight: var(--font-heading-weight);
+  font-size: 3.2rem;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: #2b2821;
+  margin: 0 0 16px;
+}
+
+@media screen and (min-width: 750px) {
+  .healing-timeline__heading {
+    font-size: 4rem;
+  }
+}
+
+.healing-timeline__subheading {
+  font-family: var(--font-body-family);
+  font-style: italic;
+  font-size: 1.8rem;
+  line-height: 1.2;
+  color: #2b2821;
+  margin: 0;
+}
+
+/* Timeline */
+.healing-timeline__milestones {
+  position: relative;
+  padding-left: 40px;
+}
+
+/* Vertical line — grows with scroll via GSAP */
+.healing-timeline__line-track {
+  position: absolute;
+  left: 6px;
+  top: 12px;
+  width: 2px;
+  height: 0;
+  background-color: #f6bc50;
+  border-radius: 2px;
+}
+
+/* Single milestone */
+.healing-timeline__milestone {
+  position: relative;
+  margin-bottom: 32px;
+  opacity: 0.3;
+  transition: opacity 0.5s ease;
+}
+
+.healing-timeline__milestone.is-active {
+  opacity: 1;
+}
+
+.healing-timeline__milestone:last-child {
+  margin-bottom: 0;
+}
+
+/* Gold dot on the timeline line */
+.healing-timeline__dot {
+  position: absolute;
+  left: -40px;
+  top: 6px;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.healing-timeline__dot-inner {
+  display: block;
+  width: 14px;
+  height: 14px;
+  background-color: #f6bc50;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+/* Gold badge */
+.healing-timeline__badge {
+  display: inline-block;
+  background-color: #f6bc50;
+  color: #2b2821;
+  font-family: var(--font-heading-family);
+  font-weight: 500;
+  font-size: 1.8rem;
+  letter-spacing: 0.05em;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+/* Milestone title */
+.healing-timeline__milestone-title {
+  font-family: var(--font-heading-family);
+  font-weight: 500;
+  font-size: 1.8rem;
+  text-transform: uppercase;
+  color: #2b2821;
+  margin: 0 0 16px;
+  line-height: 1.4;
+}
+
+/* Benefits list */
+.healing-timeline__benefits-wrap ul {
+  list-style: disc;
+  padding-left: 27px;
+  margin: 0;
+  font-family: var(--font-body-family);
+  font-size: 1.8rem;
+  line-height: 1.4;
+  color: #2b2821;
+}
+
+.healing-timeline__benefits-wrap li {
+  margin-bottom: 4px;
+}
+
+.healing-timeline__benefits-wrap li:last-child {
+  margin-bottom: 0;
+}
+
+/* How to use card */
+.healing-timeline__how-to-use {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background-color: #f0f0e9;
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-top: 32px;
+  margin-left: 40px;
+}
+
+.healing-timeline__how-to-use-images {
+  display: flex;
+  flex-shrink: 0;
+}
+
+.healing-timeline__how-to-use-images img {
+  width: 56px;
+  height: 85px;
+  object-fit: cover;
+}
+
+.healing-timeline__how-to-use-images img:first-child {
+  margin-right: -12px;
+  position: relative;
+  z-index: 1;
+}
+
+.healing-timeline__how-to-use-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.healing-timeline__how-to-use-heading {
+  font-family: var(--font-heading-family);
+  font-weight: 500;
+  font-size: 1.8rem;
+  text-transform: uppercase;
+  color: #2b2821;
+  margin: 0;
+}
+
+.healing-timeline__how-to-use-text {
+  font-family: var(--font-body-family);
+  font-size: 1.8rem;
+  line-height: 1.4;
+  color: #2b2821;
+  margin: 0;
+}
+
+/* Right column — images */
+.healing-timeline__images {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  position: relative;
+}
+
+@media screen and (min-width: 990px) {
+  .healing-timeline__images {
+    padding-top: 0;
+  }
+}
+
+.healing-timeline__image-large {
+  width: 100%;
+  max-width: 500px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.healing-timeline__image-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.healing-timeline__images-row {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  width: 100%;
+}
+
+.healing-timeline__image-small {
+  width: 45%;
+  max-width: 278px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.healing-timeline__image-small img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Mobile adjustments */
+@media screen and (max-width: 989px) {
+  .healing-timeline__images {
+    order: -1;
+  }
+
+  .healing-timeline__image-large {
+    max-width: 300px;
+  }
+
+  .healing-timeline__image-small {
+    max-width: 180px;
+  }
+
+  .healing-timeline__heading {
+    font-size: 2.8rem;
+  }
+}

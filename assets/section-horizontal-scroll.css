@@ -1,0 +1,125 @@
+/* Horizontal scroll section */
+.horizontal-scroll {
+  overflow: hidden;
+}
+
+.horizontal-scroll__pin {
+  overflow-x: auto;
+  overflow-y: hidden;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.horizontal-scroll__pin::-webkit-scrollbar {
+  display: none;
+}
+
+.horizontal-scroll__track {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.horizontal-scroll__slide {
+  flex-shrink: 0;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 12px;
+  box-sizing: border-box;
+}
+
+.horizontal-scroll__slide-inner {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Slide video */
+.horizontal-scroll__slide-video {
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.horizontal-scroll__video-el {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+/* Slide content styling */
+.horizontal-scroll__slide-image {
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.horizontal-scroll__slide-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+.horizontal-scroll__slide-heading {
+  font-family: var(--font-heading-family);
+  font-weight: var(--font-heading-weight);
+  font-size: 2.4rem;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: #2b2821;
+  margin: 0 0 16px;
+}
+
+@media screen and (min-width: 750px) {
+  .horizontal-scroll__slide-heading {
+    font-size: 3.6rem;
+  }
+}
+
+.horizontal-scroll__slide-text {
+  font-family: var(--font-body-family);
+  font-size: 1.6rem;
+  line-height: 1.5;
+  color: #2b2821;
+  margin: 0;
+}
+
+@media screen and (min-width: 750px) {
+  .horizontal-scroll__slide-text {
+    font-size: 1.8rem;
+  }
+}
+
+/* Slide width customization */
+@media screen and (min-width: 750px) {
+  .horizontal-scroll__slide {
+    width: 40vw;
+    padding: 24px 16px;
+  }
+
+  .horizontal-scroll__slide-inner {
+    max-width: 360px;
+  }
+}
+
+@media screen and (min-width: 990px) {
+  .horizontal-scroll__slide {
+    width: 33vw;
+    padding: 32px 20px;
+  }
+
+  .horizontal-scroll__slide-inner {
+    max-width: 380px;
+  }
+}
+
+/* Mobile — smaller slides */
+@media screen and (max-width: 749px) {
+  .horizontal-scroll__slide {
+    width: 85vw;
+    padding: 20px 12px;
+  }
+}

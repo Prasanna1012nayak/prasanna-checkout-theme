@@ -1,0 +1,257 @@
+{{ 'section-3d-slideshow.css' | asset_url | stylesheet_tag }}
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+  .anim-slideshow--{{ section.id }} { background: {{ section.settings.bg_color | default: '#0a0a0a' }} !important; }
+{%- endstyle -%}
+
+<div
+  class="anim-slideshow anim-slideshow--{{ section.id }} section-{{ section.id }}-padding"
+  data-anim-slideshow
+  data-swipe-speed="{{ section.settings.swipe_speed | default: 3000 }}"
+  data-glb-url="{{ section.settings.glb_url }}"
+  data-initial-side="{{ section.settings.initial_side | default: 'front' }}"
+  data-field-of-view="{{ section.settings.field_of_view | default: '45' }}"
+  data-exposure="{{ section.settings.model_exposure | default: '1' }}"
+  data-rotation-speed="{{ section.settings.rotation_speed | default: '15' }}"
+>
+  <div class="anim-slideshow__viewport">
+
+    {%- comment -%} ── SLIDES ── {%- endcomment -%}
+    <div class="anim-slideshow__slides">
+      {%- for block in section.blocks -%}
+        <div
+          class="anim-slideshow__slide{% if forloop.first %} is-active{% endif %}"
+          data-slide-index="{{ forloop.index0 }}"
+          {{ block.shopify_attributes }}
+        >
+          <div class="anim-slideshow__slide-bg">
+            {%- if block.settings.bg_video != blank -%}
+              <video playsinline loop muted autoplay preload="auto">
+                {%- for source in block.settings.bg_video.sources -%}
+                  <source src="{{ source.url }}" type="{{ source.mime_type }}">
+                {%- endfor -%}
+              </video>
+            {%- elsif block.settings.bg_image != blank -%}
+              {{ block.settings.bg_image | image_url: width: 1920 | image_tag: loading: 'lazy', sizes: '100vw', widths: '375, 750, 1080, 1440, 1920' }}
+            {%- else -%}
+              <div style="width:100%;height:100%;background:{% if block.settings.bg_color != blank %}{{ block.settings.bg_color }}{% else %}{{ section.settings.bg_color | default: '#0a0a0a' }}{% endif %};"></div>
+            {%- endif -%}
+          </div>
+
+          <div class="anim-slideshow__content" data-slide-content>
+            {%- if block.settings.badge != blank -%}
+              <div class="anim-slideshow__badge">{{ block.settings.badge }}</div>
+            {%- endif -%}
+            {%- if block.settings.heading != blank -%}
+              <h2 class="anim-slideshow__heading">{{ block.settings.heading }}</h2>
+            {%- endif -%}
+            {%- if block.settings.text != blank -%}
+              <p class="anim-slideshow__text">{{ block.settings.text }}</p>
+            {%- endif -%}
+            {%- if block.settings.button_label != blank -%}
+              <a class="anim-slideshow__cta" href="{{ block.settings.button_link | default: '#' }}">
+                {{ block.settings.button_label }}
+              </a>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+
+    {%- comment -%} ── 3D MODEL ── {%- endcomment -%}
+    <div class="anim-slideshow__shadow" data-anim-shadow></div>
+
+    <div class="anim-slideshow__3d-layer" data-anim-3d>
+      <div class="anim-slideshow__3d-object" data-anim-object role="presentation">
+        {%- if section.settings.glb_url != blank -%}
+          <canvas class="anim-slideshow__threejs-canvas" data-threejs-canvas></canvas>
+          <div class="anim-slideshow__drag-overlay" data-drag-overlay></div>
+        {%- elsif section.settings.object_image != blank -%}
+          {{ section.settings.object_image | image_url: width: 800 | image_tag: loading: 'eager', widths: '400, 600, 800' }}
+        {%- else -%}
+          <svg class="anim-slideshow__car-svg" viewBox="0 0 800 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M120 260 L180 260 L220 180 L360 160 L540 160 L620 180 L680 260 L720 260 L720 300 L680 320 L160 320 L120 300 Z" fill="#e63946" stroke="#c1121f" stroke-width="3"/>
+            <path d="M260 180 L300 120 L500 120 L540 160 L360 160 Z" fill="#e63946" stroke="#c1121f" stroke-width="2"/>
+            <circle cx="240" cy="320" r="50" fill="#2b2d42" stroke="#8d99ae" stroke-width="4"/>
+            <circle cx="240" cy="320" r="28" fill="#8d99ae"/>
+            <circle cx="580" cy="320" r="50" fill="#2b2d42" stroke="#8d99ae" stroke-width="4"/>
+            <circle cx="580" cy="320" r="28" fill="#8d99ae"/>
+          </svg>
+        {%- endif -%}
+      </div>
+    </div>
+
+    {%- comment -%} ── Effects ── {%- endcomment -%}
+    <div class="anim-slideshow__particles" data-particles></div>
+    <div class="anim-slideshow__speed-lines" data-speed-lines></div>
+    <div class="anim-slideshow__motion-blur" data-motion-blur></div>
+    <div class="anim-slideshow__tire-marks" data-tire-marks>
+      <div class="anim-slideshow__tire-mark"></div>
+      <div class="anim-slideshow__tire-mark"></div>
+    </div>
+
+    {%- comment -%} ── Hint ── {%- endcomment -%}
+    <div class="anim-slideshow__hint" data-anim-hint>
+      <span>Swipe to reveal</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M5 12h14M12 5l7 7-7 7"/>
+      </svg>
+    </div>
+
+    {%- comment -%} ── Dots ── {%- endcomment -%}
+    {%- if section.blocks.size > 1 -%}
+      <div class="anim-slideshow__dots">
+        {%- for block in section.blocks -%}
+          <button
+            class="anim-slideshow__dot{% if forloop.first %} is-active{% endif %}"
+            data-dot-index="{{ forloop.index0 }}"
+            aria-label="Go to slide {{ forloop.index }}"
+          ></button>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+<script type="module" src="{{ 'section-3d-slideshow.js' | asset_url }}"></script>
+
+{% schema %}
+{
+  "name": "3D Animated Slideshow",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "url",
+      "id": "glb_url",
+      "label": "GLB 3D Model URL",
+      "info": "Paste the URL to your .glb file (upload to Shopify Files first)."
+    },
+    {
+      "type": "image_picker",
+      "id": "object_image",
+      "label": "Fallback Object Image (PNG)",
+      "info": "Used if no GLB file is set."
+    },
+    {
+      "type": "select",
+      "id": "initial_side",
+      "label": "Show this side first",
+      "default": "front",
+      "options": [
+        { "value": "front", "label": "Front" },
+        { "value": "back", "label": "Back" },
+        { "value": "left", "label": "Left side" },
+        { "value": "right", "label": "Right side" },
+        { "value": "front_top", "label": "Front (top view)" },
+        { "value": "front_low", "label": "Front (low angle)" },
+        { "value": "left_top", "label": "Left (top view)" },
+        { "value": "right_top", "label": "Right (top view)" }
+      ],
+      "info": "Which side of the 3D model the visitor sees first."
+    },
+    {
+      "type": "text",
+      "id": "field_of_view",
+      "label": "Field of view",
+      "default": "45",
+      "info": "Camera lens angle in degrees. 30 = zoomed in, 60 = wide angle."
+    },
+    {
+      "type": "text",
+      "id": "model_exposure",
+      "label": "Model brightness",
+      "default": "1",
+      "info": "0.5 = darker, 2 = brighter"
+    },
+    {
+      "type": "text",
+      "id": "rotation_speed",
+      "label": "Auto-rotation speed",
+      "default": "15",
+      "info": "Speed of auto-spin. 0 = off, 10 = slow, 30 = fast."
+    },
+    {
+      "type": "range",
+      "id": "swipe_speed",
+      "min": 500,
+      "max": 6000,
+      "step": 250,
+      "unit": "ms",
+      "label": "Fly-out duration",
+      "default": 3000
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background color",
+      "default": "#0a0a0a"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 0
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        { "type": "image_picker", "id": "bg_image", "label": "Background image" },
+        { "type": "video", "id": "bg_video", "label": "Background video (priority over image)" },
+        { "type": "color", "id": "bg_color", "label": "Slide background color", "info": "Used when no image or video is set." },
+        { "type": "text", "id": "badge", "label": "Badge text", "default": "New Release" },
+        { "type": "text", "id": "heading", "label": "Heading", "default": "Unleash the Power" },
+        { "type": "textarea", "id": "text", "label": "Description", "default": "Swipe the object away to discover what's underneath." },
+        { "type": "text", "id": "button_label", "label": "Button label", "default": "Shop Now" },
+        { "type": "url", "id": "button_link", "label": "Button link" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "3D Animated Slideshow",
+      "blocks": [
+        { "type": "slide", "settings": { "badge": "New Release", "heading": "Unleash the Power", "text": "Swipe the 3D model to send it flying.", "button_label": "Shop Now" } },
+        { "type": "slide", "settings": { "badge": "Featured", "heading": "Built for Performance", "text": "Every detail engineered for perfection.", "button_label": "Learn More" } },
+        { "type": "slide", "settings": { "badge": "Limited Edition", "heading": "Race to the Finish", "text": "Don't miss out on this exclusive drop.", "button_label": "Get Yours" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
