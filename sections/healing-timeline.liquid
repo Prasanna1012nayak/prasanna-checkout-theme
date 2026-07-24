@@ -1,0 +1,460 @@
+{{ 'section-healing-timeline.css' | asset_url | stylesheet_tag }}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+  }
+{%- endstyle -%}
+
+<div class="healing-timeline section-{{ section.id }}-padding" data-healing-timeline>
+  <div class="healing-timeline__container page-width">
+    {%- comment -%} Left column: heading + timeline {%- endcomment -%}
+    <div class="healing-timeline__left">
+      <div class="healing-timeline__header" data-ht-header>
+        {%- if section.settings.heading != blank -%}
+          <h2 class="healing-timeline__heading">
+            {{ section.settings.heading }}
+          </h2>
+        {%- endif -%}
+        {%- if section.settings.subheading != blank -%}
+          <p class="healing-timeline__subheading">
+            {{ section.settings.subheading }}
+          </p>
+        {%- endif -%}
+      </div>
+
+      {%- if section.blocks.size > 0 -%}
+        <div class="healing-timeline__milestones" data-ht-timeline>
+          <div class="healing-timeline__line-track" data-ht-line-track></div>
+
+          {%- for block in section.blocks -%}
+            <div class="healing-timeline__milestone" data-ht-milestone {{ block.shopify_attributes }}>
+              <div class="healing-timeline__dot" data-ht-dot>
+                <span class="healing-timeline__dot-inner"></span>
+              </div>
+
+              {%- if block.settings.badge_label != blank -%}
+                <span class="healing-timeline__badge">{{ block.settings.badge_label }}</span>
+              {%- endif -%}
+
+              {%- if block.settings.title != blank -%}
+                <h3 class="healing-timeline__milestone-title">{{ block.settings.title }}</h3>
+              {%- endif -%}
+
+              {%- if block.settings.benefits != blank -%}
+                <div class="healing-timeline__benefits-wrap">
+                  {{ block.settings.benefits }}
+                </div>
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.how_to_use_heading != blank or section.settings.how_to_use_text != blank -%}
+        <div class="healing-timeline__how-to-use" data-ht-how-to-use>
+          {%- if section.settings.how_to_use_image != blank -%}
+            <div class="healing-timeline__how-to-use-images">
+              <img
+                src="{{ section.settings.how_to_use_image | image_url: width: 120 }}"
+                alt="{{ section.settings.how_to_use_image.alt | escape }}"
+                width="56"
+                height="85"
+                loading="lazy"
+              >
+              <img
+                src="{{ section.settings.how_to_use_image | image_url: width: 120 }}"
+                alt="{{ section.settings.how_to_use_image.alt | escape }}"
+                width="56"
+                height="85"
+                loading="lazy"
+              >
+            </div>
+          {%- endif -%}
+          <div class="healing-timeline__how-to-use-content">
+            {%- if section.settings.how_to_use_heading != blank -%}
+              <p class="healing-timeline__how-to-use-heading">{{ section.settings.how_to_use_heading }}</p>
+            {%- endif -%}
+            {%- if section.settings.how_to_use_text != blank -%}
+              <p class="healing-timeline__how-to-use-text">{{ section.settings.how_to_use_text }}</p>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} Right column: circular images {%- endcomment -%}
+    <div class="healing-timeline__images">
+      {%- if section.settings.image_1 != blank -%}
+        <div class="healing-timeline__image-large">
+          {{
+            section.settings.image_1
+            | image_url: width: 1000
+            | image_tag: loading: 'lazy', sizes: '(min-width: 990px) 500px, 300px', widths: '300, 500, 750, 1000'
+          }}
+        </div>
+      {%- endif -%}
+
+      <div class="healing-timeline__images-row">
+        {%- if section.settings.image_2 != blank -%}
+          <div class="healing-timeline__image-small">
+            {{
+              section.settings.image_2
+              | image_url: width: 600
+              | image_tag: loading: 'lazy', sizes: '(min-width: 990px) 278px, 180px', widths: '180, 278, 400, 600'
+            }}
+          </div>
+        {%- endif -%}
+
+        {%- if section.settings.image_3 != blank -%}
+          <div class="healing-timeline__image-small">
+            {{
+              section.settings.image_3
+              | image_url: width: 600
+              | image_tag: loading: 'lazy', sizes: '(min-width: 990px) 278px, 180px', widths: '180, 278, 400, 600'
+            }}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+{%- comment -%} Lazy-load GSAP + ScrollTrigger, then init animations {%- endcomment -%}
+<script>
+  (function() {
+    var section = document.querySelector('[data-healing-timeline]');
+    if (!section) return;
+
+    var loaded = false;
+    var GSAP_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.7/gsap.min.js';
+    var ST_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.7/ScrollTrigger.min.js';
+
+    function loadScript(src, callback) {
+      var s = document.createElement('script');
+      s.src = src;
+      s.onload = callback;
+      s.onerror = function() { console.warn('Failed to load: ' + src); };
+      document.body.appendChild(s);
+    }
+
+    function initGSAPTimeline(root) {
+      if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      var milestones = root.querySelectorAll('[data-ht-milestone]');
+      var dots = root.querySelectorAll('[data-ht-dot] .healing-timeline__dot-inner');
+      var lineTrack = root.querySelector('[data-ht-line-track]');
+      var header = root.querySelector('[data-ht-header]');
+      var howToUse = root.querySelector('[data-ht-how-to-use]');
+      var timeline = root.querySelector('[data-ht-timeline]');
+
+      if (!milestones.length || !timeline) return;
+
+      /* --- Header fade in --- */
+      if (header) {
+        gsap.fromTo(header,
+          { y: 30, opacity: 0 },
+          {
+            y: 0, opacity: 1, duration: 0.8, ease: 'power2.out',
+            scrollTrigger: {
+              trigger: header,
+              start: 'top 85%',
+              toggleActions: 'play none none none'
+            }
+          }
+        );
+      }
+
+      /* --- Dot scale pop for each milestone --- */
+      milestones.forEach(function(ms, i) {
+        var dot = dots[i];
+        if (dot) {
+          gsap.fromTo(dot,
+            { scale: 0 },
+            {
+              scale: 1, duration: 0.4, ease: 'back.out(2)',
+              scrollTrigger: {
+                trigger: ms,
+                start: 'top 80%',
+                toggleActions: 'play none none none'
+              }
+            }
+          );
+        }
+      });
+
+      /* --- Line track + active milestone driven by single scrub ScrollTrigger --- */
+      if (lineTrack) {
+        var lastMilestone = milestones[milestones.length - 1];
+        var maxHeight = lastMilestone.offsetTop;
+
+        /* Get each milestone's dot position as a fraction of the line */
+        var dotPositions = [];
+        milestones.forEach(function(ms) {
+          dotPositions.push(ms.offsetTop / maxHeight);
+        });
+
+        gsap.fromTo(lineTrack,
+          { height: 0 },
+          {
+            height: maxHeight,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: timeline,
+              start: 'top 75%',
+              end: 'bottom 60%',
+              scrub: 0.3,
+              onUpdate: function(self) {
+                var progress = self.progress;
+
+                /* Cumulative: activate all milestones the line has reached */
+                milestones.forEach(function(m, j) {
+                  if (progress >= dotPositions[j] - 0.02) {
+                    m.classList.add('is-active');
+                  } else {
+                    m.classList.remove('is-active');
+                  }
+                });
+              }
+            }
+          }
+        );
+      }
+
+      /* --- How to use card --- */
+      if (howToUse) {
+        gsap.fromTo(howToUse,
+          { y: 20, opacity: 0 },
+          {
+            y: 0, opacity: 1, duration: 0.6, ease: 'power2.out',
+            scrollTrigger: {
+              trigger: howToUse,
+              start: 'top 85%',
+              toggleActions: 'play none none none'
+            }
+          }
+        );
+      }
+
+      /* --- Right-side images --- */
+      var imageLarge = root.querySelector('.healing-timeline__image-large');
+      var imagesSmall = root.querySelectorAll('.healing-timeline__image-small');
+
+      if (imageLarge) {
+        gsap.fromTo(imageLarge,
+          { scale: 0.85, opacity: 0 },
+          {
+            scale: 1, opacity: 1, duration: 1, ease: 'power2.out',
+            scrollTrigger: {
+              trigger: imageLarge,
+              start: 'top 85%',
+              toggleActions: 'play none none none'
+            }
+          }
+        );
+      }
+
+      imagesSmall.forEach(function(img, i) {
+        gsap.fromTo(img,
+          { scale: 0.8, opacity: 0 },
+          {
+            scale: 1, opacity: 1, duration: 0.8, delay: i * 0.15, ease: 'power2.out',
+            scrollTrigger: {
+              trigger: img,
+              start: 'top 90%',
+              toggleActions: 'play none none none'
+            }
+          }
+        );
+      });
+    }
+
+    /* Lazy-load: only fetch GSAP when section is near viewport */
+    var observer = new IntersectionObserver(function(entries) {
+      if (entries[0].isIntersecting && !loaded) {
+        loaded = true;
+        observer.disconnect();
+
+        /* Sequential load: GSAP core → ScrollTrigger → init */
+        loadScript(GSAP_CDN, function() {
+          loadScript(ST_CDN, function() {
+            initGSAPTimeline(section);
+          });
+        });
+      }
+    }, { rootMargin: '600px' });
+
+    observer.observe(section);
+
+    /* Shopify theme editor support */
+    if (typeof Shopify !== 'undefined' && Shopify.designMode) {
+      document.addEventListener('shopify:section:load', function(e) {
+        var s = e.target.querySelector('[data-healing-timeline]');
+        if (s && typeof gsap !== 'undefined') {
+          initGSAPTimeline(s);
+        }
+      });
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Healing Timeline",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Gold offers more than a quick fix. It catalyzes real healing."
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Results you can feel in as little as 7 days.*"
+    },
+    {
+      "type": "header",
+      "content": "Images"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "Large circle image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "Small circle image (left)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_3",
+      "label": "Small circle image (right)"
+    },
+    {
+      "type": "header",
+      "content": "How to use"
+    },
+    {
+      "type": "text",
+      "id": "how_to_use_heading",
+      "label": "How to use heading",
+      "default": "How to use:"
+    },
+    {
+      "type": "text",
+      "id": "how_to_use_text",
+      "label": "How to use text",
+      "default": "Take two capsules daily with food, day or night."
+    },
+    {
+      "type": "image_picker",
+      "id": "how_to_use_image",
+      "label": "How to use image"
+    },
+    {
+      "type": "header",
+      "content": "Section padding"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 52
+    }
+  ],
+  "blocks": [
+    {
+      "type": "milestone",
+      "name": "Milestone",
+      "settings": [
+        {
+          "type": "text",
+          "id": "badge_label",
+          "label": "Badge label",
+          "default": "7 Days"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Relief From Joint and Muscle Discomfort*"
+        },
+        {
+          "type": "richtext",
+          "id": "benefits",
+          "label": "Benefits list",
+          "default": "<ul><li>Reduces swelling in the joints</li><li>Improves joint and muscle mobility</li><li>Lessens disruption from aches</li></ul>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Healing Timeline",
+      "blocks": [
+        {
+          "type": "milestone",
+          "settings": {
+            "badge_label": "7 Days",
+            "title": "Relief From Joint and Muscle Discomfort*",
+            "benefits": "<ul><li>Reduces swelling in the joints</li><li>Improves joint and muscle mobility</li><li>Lessens disruption from aches</li></ul>"
+          }
+        },
+        {
+          "type": "milestone",
+          "settings": {
+            "badge_label": "2 Weeks",
+            "title": "Restores Whole-Body Inflammatory Balance*",
+            "benefits": "<ul><li>Stimulates endogenous antioxidant enzymes</li><li>Supports body's own anti-inflammatory mechanisms</li><li>Reduces frequency and intensity of flare ups</li></ul>"
+          }
+        },
+        {
+          "type": "milestone",
+          "settings": {
+            "badge_label": "4 Weeks",
+            "title": "Improved Energy + Mental Wellbeing*",
+            "benefits": "<ul><li>Restores healthy energy metabolism</li><li>Reduces brain fog</li><li>Improves overall feeling of wellbeing</li></ul>"
+          }
+        },
+        {
+          "type": "milestone",
+          "settings": {
+            "badge_label": "6 Weeks +",
+            "title": "Whole-Body Anti-Aging*",
+            "benefits": "<ul><li>Supports immune system balance</li><li>Supports cardiovascular anti-aging</li><li>Neuroprotective and neuro-anti-aging</li></ul>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
